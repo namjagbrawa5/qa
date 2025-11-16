@@ -9,12 +9,20 @@ class Exam {
       duration = 60,
       scoringMode = 'add',
       questions = [],
-      createdBy
+      createdBy,
+      customTotalScore
     } = examData;
     
     // 计算总分
-    const questionDetails = await Question.findByIds(questions);
-    const totalScore = questionDetails.reduce((sum, q) => sum + q.score, 0);
+    let totalScore;
+    if (scoringMode === 'unlimited' && customTotalScore) {
+      // 无限制答题模式使用自定义总分
+      totalScore = customTotalScore;
+    } else {
+      // 其他模式使用题目分数之和
+      const questionDetails = await Question.findByIds(questions);
+      totalScore = questionDetails.reduce((sum, q) => sum + q.score, 0);
+    }
     
     const result = await dbRun(
       `INSERT INTO exams (title, description, duration, scoring_mode, total_score, created_by) 
@@ -95,7 +103,7 @@ class Exam {
     const values = [];
     
     Object.keys(updates).forEach(key => {
-      if (key !== 'id' && key !== 'questions' && updates[key] !== undefined) {
+      if (key !== 'id' && key !== 'questions' && key !== 'customTotalScore' && updates[key] !== undefined) {
         fields.push(`${key} = ?`);
         values.push(updates[key]);
       }
@@ -127,8 +135,15 @@ class Exam {
       }
       
       // 重新计算总分
-      const questionDetails = await Question.findByIds(updates.questions);
-      const totalScore = questionDetails.reduce((sum, q) => sum + q.score, 0);
+      let totalScore;
+      if (updates.scoringMode === 'unlimited' && updates.customTotalScore) {
+        // 无限制答题模式使用自定义总分
+        totalScore = updates.customTotalScore;
+      } else {
+        // 其他模式使用题目分数之和
+        const questionDetails = await Question.findByIds(updates.questions);
+        totalScore = questionDetails.reduce((sum, q) => sum + q.score, 0);
+      }
       await dbRun('UPDATE exams SET total_score = ? WHERE id = ?', [totalScore, id]);
     }
     

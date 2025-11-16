@@ -95,7 +95,7 @@ router.get('/:examId/results', authenticateToken, requireAdmin, async (req, res)
 // 创建试卷（仅管理员）
 router.post('/', authenticateToken, requireAdmin, async (req, res) => {
   try {
-    const { title, description, duration, scoringMode, questions } = req.body;
+    const { title, description, duration, scoringMode, questions, customTotalScore } = req.body;
     
     // 验证输入
     if (!title || !questions || !Array.isArray(questions) || questions.length === 0) {
@@ -108,7 +108,8 @@ router.post('/', authenticateToken, requireAdmin, async (req, res) => {
       duration: parseInt(duration) || 60,
       scoringMode: scoringMode || 'add',
       questions,
-      createdBy: req.user.id
+      createdBy: req.user.id,
+      customTotalScore: customTotalScore ? parseInt(customTotalScore) : undefined
     });
     
     const newExam = await Exam.findById(examId);
@@ -127,7 +128,7 @@ router.post('/', authenticateToken, requireAdmin, async (req, res) => {
 router.put('/:examId', authenticateToken, requireAdmin, async (req, res) => {
   try {
     const { examId } = req.params;
-    const { title, description, duration, scoringMode, questions, isActive } = req.body;
+    const { title, description, duration, scoringMode, questions, isActive, customTotalScore } = req.body;
     
     const updates = {};
     
@@ -137,6 +138,7 @@ router.put('/:examId', authenticateToken, requireAdmin, async (req, res) => {
     if (scoringMode) updates.scoring_mode = scoringMode;
     if (isActive !== undefined) updates.is_active = isActive ? 1 : 0;
     if (questions && Array.isArray(questions)) updates.questions = questions;
+    if (customTotalScore) updates.customTotalScore = parseInt(customTotalScore);
     
     if (Object.keys(updates).length === 0) {
       return res.status(400).json({ error: '没有要更新的字段' });

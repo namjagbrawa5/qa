@@ -229,13 +229,28 @@
                           <p>• 答错题目：扣除相应分数</p>
                         </div>
                         <div v-else-if="examForm.scoringMode === 'unlimited'">
-                          <p>• 初始分数：所有题目分数之和</p>
+                          <p>• 初始分数：由出题人自定义设置</p>
                           <p>• 答对题目：不计分，继续答题</p>
                           <p>• 答错题目：直接扣除题目分数</p>
                           <p>• 结束条件：分数扣完或题目答完</p>
                           <p>• 结果显示：答题数量和最终得分</p>
                         </div>
                       </div>
+                    </div>
+                    
+                    <!-- 无限制答题模式的自定义总分 -->
+                    <div v-if="examForm.scoringMode === 'unlimited'">
+                      <label class="block text-sm font-medium text-gray-700">初始总分</label>
+                      <input
+                        v-model.number="examForm.customTotalScore"
+                        type="number"
+                        min="10"
+                        max="1000"
+                        required
+                        placeholder="请输入初始总分（如100分）"
+                        class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                      />
+                      <p class="mt-1 text-xs text-gray-500">设置无限制答题的初始分数，答错题目将从此分数中扣除</p>
                     </div>
                     
                     <div>
@@ -319,7 +334,8 @@ const examForm = reactive({
   description: '',
   duration: 60,
   scoringMode: 'add',
-  selectedQuestions: []
+  selectedQuestions: [],
+  customTotalScore: 100
 })
 
 const resetExamForm = () => {
@@ -328,6 +344,7 @@ const resetExamForm = () => {
   examForm.duration = 60
   examForm.scoringMode = 'add'
   examForm.selectedQuestions = []
+  examForm.customTotalScore = 100
 }
 
 const closeCreateModal = () => {
@@ -350,7 +367,8 @@ const handleCreateExam = async () => {
       description: examForm.description,
       duration: examForm.duration,
       scoringMode: examForm.scoringMode,
-      questions: examForm.selectedQuestions
+      questions: examForm.selectedQuestions,
+      customTotalScore: examForm.scoringMode === 'unlimited' ? examForm.customTotalScore : undefined
     }
     
     let result
@@ -380,6 +398,7 @@ const editExam = (exam) => {
   examForm.duration = exam.duration
   examForm.scoringMode = exam.scoring_mode
   examForm.selectedQuestions = exam.questions?.map(q => q.id) || []
+  examForm.customTotalScore = exam.scoring_mode === 'unlimited' ? exam.total_score : 100
   showCreateModal.value = true
 }
 
