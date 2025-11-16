@@ -50,15 +50,6 @@
               {{ authStore.isAdmin ? '试卷管理' : '考试中心' }}
             </router-link>
             
-            <!-- 无限制答题模式 -->
-            <router-link 
-              to="/unlimited" 
-              class="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
-              :class="{ 'text-blue-600 bg-blue-50': $route.name === 'UnlimitedMode' }"
-            >
-              无限制答题
-            </router-link>
-            
             <!-- 用户菜单 -->
             <div class="relative ml-3">
               <div>

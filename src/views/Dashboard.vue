@@ -29,12 +29,6 @@
             >
               用户管理
             </router-link>
-            <router-link 
-              to="/unlimited"
-              class="border border-purple-600 text-purple-600 px-6 py-3 rounded-lg font-medium hover:bg-purple-50 transition-colors"
-            >
-              无限制答题
-            </router-link>
           </template>
           <template v-else>
             <router-link 
@@ -42,12 +36,6 @@
               class="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
             >
               参加考试
-            </router-link>
-            <router-link 
-              to="/unlimited"
-              class="border border-purple-600 text-purple-600 px-6 py-3 rounded-lg font-medium hover:bg-purple-50 transition-colors"
-            >
-              无限制答题
             </router-link>
           </template>
         </div>
