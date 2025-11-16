@@ -96,7 +96,7 @@ router.get('/exam-performance', authenticateToken, requireAdmin, async (req, res
     
     if (completedRecords.length === 0) {
       return res.json({
-        examTitle: exam.title,
+        title: exam.title,
         totalParticipants: 0,
         avgScore: 0,
         avgAccuracy: 0,
@@ -145,7 +145,7 @@ router.get('/exam-performance', authenticateToken, requireAdmin, async (req, res
       }));
     
     res.json({
-      examTitle: exam.title,
+      title: exam.title,
       totalParticipants: completedRecords.length,
       avgScore,
       avgAccuracy,
