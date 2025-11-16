@@ -93,7 +93,7 @@ router.get('/exam-status', authenticateToken, requireAdmin, async (req, res) => 
     query += ' ORDER BY u.username, e.title LIMIT ? OFFSET ?';
     params.push(parseInt(limit), parseInt(offset));
     
-    const { dbAll } = await import('../config/database.js');
+    const { dbAll } = await import('../models/database.js');
     const results = await dbAll(query, params);
     
     res.json(results);
