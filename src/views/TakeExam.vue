@@ -25,12 +25,12 @@
     </div>
 
     <!-- 考试准备页面 -->
-    <div v-else-if="!examStarted && exam" class="max-w-2xl mx-auto py-12 px-4">
-      <div class="bg-white rounded-lg shadow-lg p-8">
-        <h1 class="text-3xl font-bold text-gray-900 mb-4">{{ exam.title }}</h1>
+    <div v-else-if="!examStarted && exam" class="max-w-2xl mx-auto py-6 sm:py-12 px-4">
+      <div class="bg-white rounded-lg shadow-lg p-4 sm:p-8">
+        <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">{{ exam.title }}</h1>
         <p class="text-gray-600 mb-6">{{ exam.description || '暂无描述' }}</p>
         
-        <div class="grid grid-cols-2 gap-4 mb-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
           <div class="bg-gray-50 p-4 rounded-lg">
             <div class="text-sm text-gray-500">题目数量</div>
             <div class="text-xl font-semibold text-gray-900">{{ exam.questions?.length || 0 }} 题</div>
@@ -76,26 +76,26 @@
     </div>
 
     <!-- 考试进行中 -->
-    <div v-else-if="examStarted && exam" class="max-w-4xl mx-auto py-6 px-4">
+    <div v-else-if="examStarted && exam" class="max-w-4xl mx-auto py-2 sm:py-6 px-2 sm:px-4">
       <!-- 考试头部信息 -->
-      <div class="bg-white rounded-lg shadow p-4 mb-6 sticky top-0 z-10">
+      <div class="bg-white rounded-lg shadow p-3 sm:p-4 mb-4 sm:mb-6 sticky top-0 z-10">
         <div class="flex justify-between items-center">
-          <div>
-            <h1 class="text-xl font-semibold text-gray-900">{{ exam.title }}</h1>
-            <p class="text-sm text-gray-500">
+          <div class="flex-1 min-w-0">
+            <h1 class="text-lg sm:text-xl font-semibold text-gray-900 truncate">{{ exam.title }}</h1>
+            <p class="text-xs sm:text-sm text-gray-500">
               第 {{ currentQuestionIndex + 1 }} 题 / 共 {{ exam.questions.length }} 题
             </p>
           </div>
-          <div class="text-right">
+          <div class="text-right ml-4">
             <!-- 无限制答题模式显示分数 -->
-            <div v-if="exam.scoring_mode === 'unlimited'" class="text-2xl font-bold" :class="currentScore < 50 ? 'text-red-600' : 'text-gray-900'">
+            <div v-if="exam.scoring_mode === 'unlimited'" class="text-xl sm:text-2xl font-bold" :class="currentScore < 50 ? 'text-red-600' : 'text-gray-900'">
               {{ currentScore }} 分
             </div>
             <!-- 普通模式显示时间 -->
-            <div v-else class="text-2xl font-bold" :class="timeRemaining < 300 ? 'text-red-600' : 'text-gray-900'">
+            <div v-else class="text-xl sm:text-2xl font-bold" :class="timeRemaining < 300 ? 'text-red-600' : 'text-gray-900'">
               {{ formatTime(timeRemaining) }}
             </div>
-            <p class="text-sm text-gray-500">{{ exam.scoring_mode === 'unlimited' ? '剩余分数' : '剩余时间' }}</p>
+            <p class="text-xs sm:text-sm text-gray-500">{{ exam.scoring_mode === 'unlimited' ? '剩余分数' : '剩余时间' }}</p>
           </div>
         </div>
         
@@ -110,7 +110,7 @@
         </div>
         
         <!-- 无限制答题模式统计信息 -->
-        <div v-if="exam.scoring_mode === 'unlimited'" class="mt-4 grid grid-cols-3 gap-4 text-center">
+        <div v-if="exam.scoring_mode === 'unlimited'" class="mt-3 sm:mt-4 grid grid-cols-3 gap-2 sm:gap-4 text-center">
           <div class="bg-gray-50 p-2 rounded">
             <div class="text-lg font-semibold text-gray-900">{{ questionsAnswered }}</div>
             <div class="text-xs text-gray-500">已答题数</div>
@@ -129,7 +129,7 @@
       </div>
 
       <!-- 题目内容 -->
-      <div v-if="currentQuestion" class="bg-white rounded-lg shadow p-6 mb-6">
+      <div v-if="currentQuestion" class="bg-white rounded-lg shadow p-4 sm:p-6 mb-4 sm:mb-6">
         <div class="flex items-center space-x-2 mb-4">
           <span :class="[
             'inline-flex px-2 py-1 text-xs font-semibold rounded-full',
@@ -140,21 +140,21 @@
           <span class="text-sm text-gray-500">{{ currentQuestion.score }}分</span>
         </div>
         
-        <h2 class="text-lg font-medium text-gray-900 mb-4">{{ currentQuestion.question }}</h2>
+        <h2 class="text-base sm:text-lg font-medium text-gray-900 mb-4 leading-relaxed">{{ currentQuestion.question }}</h2>
         
         <!-- 多媒体内容 -->
-        <div v-if="currentQuestion.image_url || currentQuestion.audio_url || currentQuestion.video_url" class="mb-6 space-y-4">
-          <img v-if="currentQuestion.image_url" :src="getMediaUrl(currentQuestion.image_url)" alt="题目图片" class="max-w-md rounded-lg" />
+        <div v-if="currentQuestion.image_url || currentQuestion.audio_url || currentQuestion.video_url" class="mb-4 sm:mb-6 space-y-4">
+          <img v-if="currentQuestion.image_url" :src="getMediaUrl(currentQuestion.image_url)" alt="题目图片" class="w-full max-w-md rounded-lg" />
           <audio v-if="currentQuestion.audio_url" :src="getMediaUrl(currentQuestion.audio_url)" controls class="w-full max-w-md"></audio>
           <video v-if="currentQuestion.video_url" :src="getMediaUrl(currentQuestion.video_url)" controls class="w-full max-w-md"></video>
         </div>
         
         <!-- 选项 -->
-        <div class="space-y-3">
+        <div class="space-y-2 sm:space-y-3">
           <label
             v-for="(option, index) in currentQuestion.options"
             :key="index"
-            class="flex items-start space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer"
+            class="flex items-start space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
             :class="{ 'bg-blue-50 border-blue-300': isOptionSelected(index) }"
           >
             <input
@@ -183,23 +183,23 @@
       </div>
 
       <!-- 导航按钮 -->
-      <div class="bg-white rounded-lg shadow p-4">
-        <div class="flex justify-between items-center">
+      <div class="bg-white rounded-lg shadow p-3 sm:p-4">
+        <div class="flex justify-between items-center space-x-2">
           <button
             @click="previousQuestion"
             :disabled="currentQuestionIndex === 0"
-            class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="px-3 sm:px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
           >
             上一题
           </button>
           
-          <div class="flex space-x-2">
+          <div class="flex space-x-2 flex-shrink-0">
             <!-- 无限制答题模式 -->
             <template v-if="exam.scoring_mode === 'unlimited'">
               <button
                 @click="submitUnlimitedAnswer"
                 :disabled="isSubmitting || !hasCurrentAnswer"
-                class="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                class="px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {{ isSubmitting ? '提交中...' : '提交答案' }}
               </button>
@@ -209,7 +209,7 @@
               <button
                 v-if="currentQuestionIndex < exam.questions.length - 1"
                 @click="nextQuestion"
-                class="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700"
+                class="px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700"
               >
                 下一题
               </button>
@@ -217,7 +217,7 @@
                 v-else
                 @click="submitExam"
                 :disabled="isSubmitting"
-                class="px-4 py-2 bg-green-600 text-white rounded-md text-sm font-medium hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                class="px-3 sm:px-4 py-2 bg-green-600 text-white rounded-md text-sm font-medium hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {{ isSubmitting ? '提交中...' : '提交试卷' }}
               </button>

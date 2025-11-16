@@ -10,3 +10,79 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+/* 移动端导航样式 */
+.mobile-nav {
+  @apply fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50;
+}
+
+.mobile-nav-item {
+  @apply flex-1 flex flex-col items-center justify-center py-2 px-1 text-xs text-gray-600 hover:text-blue-600 transition-colors;
+}
+
+/* 移动端表格优化 */
+@media (max-width: 768px) {
+  .mobile-table-wrapper {
+    @apply overflow-x-auto;
+  }
+  
+  .mobile-table {
+    @apply min-w-full;
+  }
+  
+  .mobile-table th,
+  .mobile-table td {
+    @apply px-2 py-3 text-sm;
+  }
+  
+  /* 移动端卡片布局 */
+  .mobile-card {
+    @apply bg-white rounded-lg shadow p-4 mb-4;
+  }
+  
+  .mobile-card-header {
+    @apply flex justify-between items-start mb-3;
+  }
+  
+  .mobile-card-content {
+    @apply space-y-2;
+  }
+  
+  .mobile-card-row {
+    @apply flex justify-between items-center py-1;
+  }
+  
+  .mobile-card-label {
+    @apply text-sm font-medium text-gray-600;
+  }
+  
+  .mobile-card-value {
+    @apply text-sm text-gray-900;
+  }
+}
+
+/* 移动端表单优化 */
+@media (max-width: 640px) {
+  .mobile-form-grid {
+    @apply grid-cols-1 gap-4;
+  }
+  
+  .mobile-button-group {
+    @apply flex flex-col space-y-2;
+  }
+  
+  .mobile-button-group .btn {
+    @apply w-full;
+  }
+}
+
+/* 移动端模态框优化 */
+@media (max-width: 768px) {
+  .mobile-modal {
+    @apply w-full h-full m-0 rounded-none;
+  }
+  
+  .mobile-modal-content {
+    @apply h-full overflow-y-auto;
+  }
+}

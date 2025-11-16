@@ -58,7 +58,107 @@
         </div>
       </div>
 
-      <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- 移动端卡片视图 -->
+      <div v-else class="md:hidden space-y-4">
+        <div
+          v-for="exam in examStore.exams"
+          :key="exam.id"
+          class="mobile-card"
+        >
+          <div class="mobile-card-header">
+            <h3 class="text-lg font-medium text-gray-900">{{ exam.title }}</h3>
+            <div class="flex flex-col items-end space-y-1">
+              <span :class="[
+                'inline-flex px-2 py-1 text-xs font-semibold rounded-full',
+                exam.scoring_mode === 'add' ? 'bg-green-100 text-green-800' : 
+                exam.scoring_mode === 'subtract' ? 'bg-orange-100 text-orange-800' : 
+                'bg-purple-100 text-purple-800'
+              ]">
+                {{ exam.scoring_mode === 'add' ? '加分制' : 
+                   exam.scoring_mode === 'subtract' ? '减分制' : '无限制答题' }}
+              </span>
+              <span v-if="authStore.isAdmin" :class="[
+                'inline-flex px-2 py-1 text-xs font-semibold rounded-full',
+                exam.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+              ]">
+                {{ exam.is_active ? '已激活' : '未激活' }}
+              </span>
+            </div>
+          </div>
+          
+          <div class="mobile-card-content">
+            <div class="mobile-card-row">
+              <span class="mobile-card-label">题目数量</span>
+              <span class="mobile-card-value">{{ exam.questions?.length || 0 }} 题</span>
+            </div>
+            <div class="mobile-card-row">
+              <span class="mobile-card-label">总分</span>
+              <span class="mobile-card-value">{{ exam.total_score }} 分</span>
+            </div>
+            <div class="mobile-card-row">
+              <span class="mobile-card-label">时间限制</span>
+              <span class="mobile-card-value">{{ exam.time_limit }} 分钟</span>
+            </div>
+            <div class="mobile-card-row">
+              <span class="mobile-card-label">创建时间</span>
+              <span class="mobile-card-value">{{ formatDate(exam.created_at) }}</span>
+            </div>
+          </div>
+          
+          <div class="mt-4 flex flex-col space-y-2">
+            <template v-if="authStore.isAdmin">
+              <div class="flex space-x-2">
+                <button
+                  @click="editExam(exam)"
+                  class="flex-1 px-3 py-2 text-sm text-blue-600 border border-blue-600 rounded hover:bg-blue-50"
+                >
+                  编辑
+                </button>
+                <button
+                  @click="toggleExamActive(exam.id)"
+                  :class="[
+                    'flex-1 px-3 py-2 text-sm rounded',
+                    exam.is_active 
+                      ? 'text-orange-600 border border-orange-600 hover:bg-orange-50'
+                      : 'text-green-600 border border-green-600 hover:bg-green-50'
+                  ]"
+                >
+                  {{ exam.is_active ? '停用' : '启用' }}
+                </button>
+              </div>
+              <div class="flex space-x-2">
+                <button
+                  @click="viewResults(exam.id)"
+                  class="flex-1 px-3 py-2 text-sm text-purple-600 border border-purple-600 rounded hover:bg-purple-50"
+                >
+                  查看结果
+                </button>
+                <button
+                  @click="deleteExam(exam.id)"
+                  class="flex-1 px-3 py-2 text-sm text-red-600 border border-red-600 rounded hover:bg-red-50"
+                >
+                  删除
+                </button>
+              </div>
+            </template>
+            <template v-else>
+              <button
+                v-if="exam.is_active"
+                @click="startExam(exam.id)"
+                class="w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              >
+                开始考试
+              </button>
+              <div v-else class="text-center text-gray-500 py-2">
+                试卷未激活
+              </div>
+            </template>
+          </div>
+        </div>
+      </div>
+
+      <!-- 桌面端网格视图 -->
+      <div v-else class="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div
           v-for="exam in examStore.exams"
           :key="exam.id"

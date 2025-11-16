@@ -9,7 +9,7 @@
         <p class="text-lg text-gray-600 mb-6">
           {{ authStore.isAdmin ? '管理员控制台 - 管理题库、试卷和用户' : '学习中心 - 参加考试，提升自己' }}
         </p>
-        <div class="flex justify-center space-x-4">
+        <div class="flex justify-center space-x-4 mobile-button-group sm:flex-row sm:space-x-4 sm:space-y-0">
           <template v-if="authStore.isAdmin">
             <router-link 
               to="/questions"
