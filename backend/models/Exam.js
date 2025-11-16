@@ -10,7 +10,8 @@ class Exam {
       scoringMode = 'add',
       questions = [],
       createdBy,
-      customTotalScore
+      customTotalScore,
+      randomizeQuestions = false
     } = examData;
     
     // 计算总分
@@ -25,9 +26,9 @@ class Exam {
     }
     
     const result = await dbRun(
-      `INSERT INTO exams (title, description, duration, scoring_mode, total_score, created_by) 
-       VALUES (?, ?, ?, ?, ?, ?)`,
-      [title, description, duration, scoringMode, totalScore, createdBy]
+      `INSERT INTO exams (title, description, duration, scoring_mode, total_score, randomize_questions, created_by) 
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [title, description, duration, scoringMode, totalScore, randomizeQuestions ? 1 : 0, createdBy]
     );
     
     const examId = result.id;
@@ -50,12 +51,17 @@ class Exam {
     if (!exam) return null;
     
     // 获取试卷题目
+    let orderBy = 'eq.question_order';
+    if (exam.randomize_questions) {
+      orderBy = 'RANDOM()';
+    }
+    
     const questions = await dbAll(
       `SELECT q.*, eq.question_order 
        FROM questions q 
        JOIN exam_questions eq ON q.id = eq.question_id 
        WHERE eq.exam_id = ? 
-       ORDER BY eq.question_order`,
+       ORDER BY ${orderBy}`,
       [id]
     );
     

@@ -539,9 +539,12 @@ const submitExam = async () => {
   
   try {
     const result = await examStore.submitExam(exam.value.id, answers)
+    console.log('提交考试结果:', result)
     if (result.success) {
       examResult.value = result.result
       examStarted.value = false
+      console.log('考试结果设置完成:', examResult.value)
+      console.log('examStarted设置为:', examStarted.value)
     } else {
       alert(result.error || '提交失败')
       startTimer() // 重新开始计时

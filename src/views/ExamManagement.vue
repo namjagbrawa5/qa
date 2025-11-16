@@ -359,6 +359,21 @@
                       </p>
                     </div>
                     
+                    <!-- 随机排序选项 -->
+                    <div>
+                      <label class="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          v-model="examForm.randomizeQuestions"
+                          class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        />
+                        <span class="text-sm font-medium text-gray-700">随机排序题目</span>
+                      </label>
+                      <p class="mt-1 text-xs text-gray-500">
+                        开启后，每次考试时题目顺序将随机排列，提高考试公平性
+                      </p>
+                    </div>
+                    
                     <div>
                       <label class="block text-sm font-medium text-gray-700 mb-2">选择题目</label>
                       <div class="max-h-60 overflow-y-auto border border-gray-300 rounded-md p-3">
@@ -441,7 +456,8 @@ const examForm = reactive({
   duration: 60,
   scoringMode: 'add',
   selectedQuestions: [],
-  customTotalScore: 100
+  customTotalScore: 100,
+  randomizeQuestions: false
 })
 
 const resetExamForm = () => {
@@ -451,6 +467,7 @@ const resetExamForm = () => {
   examForm.scoringMode = 'add'
   examForm.selectedQuestions = []
   examForm.customTotalScore = 100
+  examForm.randomizeQuestions = false
 }
 
 const closeCreateModal = () => {
@@ -474,7 +491,8 @@ const handleCreateExam = async () => {
       duration: examForm.duration,
       scoringMode: examForm.scoringMode,
       questions: examForm.selectedQuestions,
-      customTotalScore: examForm.customTotalScore
+      customTotalScore: examForm.customTotalScore,
+      randomizeQuestions: examForm.randomizeQuestions
     }
     
     let result
@@ -505,6 +523,7 @@ const editExam = (exam) => {
   examForm.scoringMode = exam.scoring_mode
   examForm.selectedQuestions = exam.questions?.map(q => q.id) || []
   examForm.customTotalScore = exam.total_score || 100
+  examForm.randomizeQuestions = exam.randomize_questions || false
   showCreateModal.value = true
 }
 

@@ -60,12 +60,20 @@ const initDatabase = () => {
         scoring_mode TEXT DEFAULT 'add' CHECK(scoring_mode IN ('add', 'subtract', 'unlimited')),
         total_score INTEGER DEFAULT 0,
         is_active BOOLEAN DEFAULT 1,
+        randomize_questions BOOLEAN DEFAULT 0, -- 是否随机排序题目
         created_by INTEGER,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (created_by) REFERENCES users (id)
       )
     `);
+
+    // 为现有的exams表添加randomize_questions字段（如果不存在）
+    try {
+      db.exec(`ALTER TABLE exams ADD COLUMN randomize_questions BOOLEAN DEFAULT 0`);
+    } catch (error) {
+      // 字段已存在，忽略错误
+    }
 
     // 试卷题目关联表
     db.exec(`

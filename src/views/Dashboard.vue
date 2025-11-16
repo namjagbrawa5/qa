@@ -256,9 +256,12 @@
                 <h4 class="text-sm font-medium text-gray-900">{{ exam.title }}</h4>
                 <span :class="[
                   'inline-flex px-2 py-1 text-xs font-semibold rounded-full',
-                  exam.scoring_mode === 'add' ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800'
+                  exam.scoring_mode === 'add' ? 'bg-green-100 text-green-800' :
+                  exam.scoring_mode === 'subtract' ? 'bg-orange-100 text-orange-800' :
+                  'bg-purple-100 text-purple-800'
                 ]">
-                  {{ exam.scoring_mode === 'add' ? '加分制' : '减分制' }}
+                  {{ exam.scoring_mode === 'add' ? '加分制' :
+                     exam.scoring_mode === 'subtract' ? '减分制' : '无限制答题' }}
                 </span>
               </div>
               <p class="text-xs text-gray-500 mb-3">{{ exam.description || '暂无描述' }}</p>

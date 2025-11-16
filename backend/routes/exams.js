@@ -19,6 +19,11 @@ router.get('/', authenticateToken, async (req, res) => {
       exams = exams.filter(exam => exam.is_active);
     }
     
+    // 为每个考试检查用户是否已经参加过
+    for (let exam of exams) {
+      exam.hasUserTaken = await Exam.hasUserTaken(req.user.id, exam.id);
+    }
+    
     res.json({
       exams,
       pagination: {
