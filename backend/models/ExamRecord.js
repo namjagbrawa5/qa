@@ -20,46 +20,95 @@ class ExamRecord {
   }
   
   static async submitExam(recordId, answers, examData) {
-    const { questions, scoringMode, totalScore: examTotalScore } = examData;
+    const { questions, scoring_mode: scoringMode, total_score: examTotalScore } = examData;
     
     let totalScore = 0;
     let correctCount = 0;
+    let questionsAnswered = 0;
     const results = [];
     
-    // 计算分数
-    for (const question of questions) {
-      const userAnswer = answers[question.id];
-      let isCorrect = false;
+    // 无限制答题模式的特殊处理
+    if (scoringMode === 'unlimited') {
+      totalScore = examTotalScore; // 初始分数为题目总分
       
-      if (question.type === 'single') {
-        isCorrect = userAnswer === question.correct_answer;
-      } else if (question.type === 'multiple') {
-        isCorrect = Array.isArray(userAnswer) && 
-          userAnswer.length === question.correct_answer.length &&
-          userAnswer.every(ans => question.correct_answer.includes(ans));
-      }
-      
-      if (isCorrect) {
-        correctCount++;
-        if (scoringMode === 'add') {
-          totalScore += question.score;
+      // 按顺序处理每个题目，直到分数扣完或题目答完
+      for (const question of questions) {
+        const userAnswer = answers[question.id];
+        if (userAnswer === undefined || userAnswer === null) {
+          break; // 如果没有答案，说明答题结束
         }
-      } else if (scoringMode === 'subtract') {
-        totalScore -= question.score;
+        
+        questionsAnswered++;
+        let isCorrect = false;
+        
+        if (question.type === 'single') {
+          isCorrect = userAnswer === question.correct_answer;
+        } else if (question.type === 'multiple') {
+          isCorrect = Array.isArray(userAnswer) && 
+            userAnswer.length === question.correct_answer.length &&
+            userAnswer.every(ans => question.correct_answer.includes(ans));
+        }
+        
+        if (isCorrect) {
+          correctCount++;
+          // 答对不计分，继续答题
+        } else {
+          // 答错直接扣分
+          totalScore -= question.score;
+        }
+        
+        results.push({
+          questionId: question.id,
+          userAnswer,
+          correctAnswer: question.correct_answer,
+          isCorrect,
+          score: isCorrect ? 0 : -question.score
+        });
+        
+        // 如果分数扣完，结束答题
+        if (totalScore <= 0) {
+          totalScore = 0;
+          break;
+        }
+      }
+    } else {
+      // 原有的加分制和减分制逻辑
+      for (const question of questions) {
+        const userAnswer = answers[question.id];
+        let isCorrect = false;
+        
+        if (question.type === 'single') {
+          isCorrect = userAnswer === question.correct_answer;
+        } else if (question.type === 'multiple') {
+          isCorrect = Array.isArray(userAnswer) && 
+            userAnswer.length === question.correct_answer.length &&
+            userAnswer.every(ans => question.correct_answer.includes(ans));
+        }
+        
+        if (isCorrect) {
+          correctCount++;
+          if (scoringMode === 'add') {
+            totalScore += question.score;
+          }
+        } else if (scoringMode === 'subtract') {
+          totalScore -= question.score;
+        }
+        
+        results.push({
+          questionId: question.id,
+          userAnswer,
+          correctAnswer: question.correct_answer,
+          isCorrect,
+          score: isCorrect ? question.score : (scoringMode === 'subtract' ? -question.score : 0)
+        });
       }
       
-      results.push({
-        questionId: question.id,
-        userAnswer,
-        correctAnswer: question.correct_answer,
-        isCorrect,
-        score: isCorrect ? question.score : (scoringMode === 'subtract' ? -question.score : 0)
-      });
-    }
-    
-    // 减分制确保最低分为0
-    if (scoringMode === 'subtract') {
-      totalScore = Math.max(0, examTotalScore + totalScore);
+      // 减分制确保最低分为0
+      if (scoringMode === 'subtract') {
+        totalScore = Math.max(0, examTotalScore + totalScore);
+      }
+      
+      questionsAnswered = questions.length;
     }
     
     const submittedAt = new Date().toISOString();
@@ -77,7 +126,7 @@ class ExamRecord {
         JSON.stringify(answers),
         totalScore,
         correctCount,
-        questions.length,
+        questionsAnswered,
         submittedAt,
         durationSeconds,
         recordId
@@ -88,7 +137,7 @@ class ExamRecord {
       id: recordId,
       totalScore,
       correctCount,
-      totalQuestions: questions.length,
+      totalQuestions: questionsAnswered,
       results,
       submittedAt,
       durationSeconds,

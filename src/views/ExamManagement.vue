@@ -69,9 +69,12 @@
             <div class="flex flex-col items-end space-y-1">
               <span :class="[
                 'inline-flex px-2 py-1 text-xs font-semibold rounded-full',
-                exam.scoring_mode === 'add' ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800'
+                exam.scoring_mode === 'add' ? 'bg-green-100 text-green-800' : 
+                exam.scoring_mode === 'subtract' ? 'bg-orange-100 text-orange-800' : 
+                'bg-purple-100 text-purple-800'
               ]">
-                {{ exam.scoring_mode === 'add' ? '加分制' : '减分制' }}
+                {{ exam.scoring_mode === 'add' ? '加分制' : 
+                   exam.scoring_mode === 'subtract' ? '减分制' : '无限制答题' }}
               </span>
               <span v-if="authStore.isAdmin" :class="[
                 'inline-flex px-2 py-1 text-xs font-semibold rounded-full',
@@ -208,7 +211,30 @@
                         >
                           <option value="add">加分制</option>
                           <option value="subtract">减分制</option>
+                          <option value="unlimited">无限制答题</option>
                         </select>
+                      </div>
+                    </div>
+                    
+                    <!-- 计分方式说明 -->
+                    <div v-if="examForm.scoringMode" class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <h4 class="text-sm font-medium text-blue-800 mb-2">计分方式说明：</h4>
+                      <div class="text-sm text-blue-700">
+                        <div v-if="examForm.scoringMode === 'add'">
+                          <p>• 答对题目：获得相应分数</p>
+                          <p>• 答错题目：不扣分</p>
+                        </div>
+                        <div v-else-if="examForm.scoringMode === 'subtract'">
+                          <p>• 答对题目：获得相应分数</p>
+                          <p>• 答错题目：扣除相应分数</p>
+                        </div>
+                        <div v-else-if="examForm.scoringMode === 'unlimited'">
+                          <p>• 初始分数：所有题目分数之和</p>
+                          <p>• 答对题目：不计分，继续答题</p>
+                          <p>• 答错题目：直接扣除题目分数</p>
+                          <p>• 结束条件：分数扣完或题目答完</p>
+                          <p>• 结果显示：答题数量和最终得分</p>
+                        </div>
                       </div>
                     </div>
                     

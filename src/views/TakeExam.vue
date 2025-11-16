@@ -46,7 +46,8 @@
           <div class="bg-gray-50 p-4 rounded-lg">
             <div class="text-sm text-gray-500">计分模式</div>
             <div class="text-xl font-semibold text-gray-900">
-              {{ exam.scoring_mode === 'add' ? '加分制' : '减分制' }}
+              {{ exam.scoring_mode === 'add' ? '加分制' : 
+                 exam.scoring_mode === 'subtract' ? '减分制' : '无限制答题' }}
             </div>
           </div>
         </div>
@@ -55,8 +56,10 @@
           <h3 class="text-sm font-medium text-yellow-800 mb-2">考试说明：</h3>
           <ul class="text-sm text-yellow-700 space-y-1">
             <li v-if="exam.scoring_mode === 'add'">• 加分制：答对题目获得相应分数，答错不扣分</li>
-            <li v-else>• 减分制：答对题目获得相应分数，答错扣除相应分数</li>
-            <li>• 请在规定时间内完成所有题目</li>
+            <li v-else-if="exam.scoring_mode === 'subtract'">• 减分制：答对题目获得相应分数，答错扣除相应分数</li>
+            <li v-else-if="exam.scoring_mode === 'unlimited'">• 无限制答题：初始分数为题目总分，答对不计分，答错直接扣分</li>
+            <li v-if="exam.scoring_mode !== 'unlimited'">• 请在规定时间内完成所有题目</li>
+            <li v-else>• 答题直到分数扣完或题目答完为止</li>
             <li>• 提交后无法修改答案</li>
             <li>• 每份试卷只能参加一次</li>
           </ul>
@@ -84,10 +87,15 @@
             </p>
           </div>
           <div class="text-right">
-            <div class="text-2xl font-bold" :class="timeRemaining < 300 ? 'text-red-600' : 'text-gray-900'">
+            <!-- 无限制答题模式显示分数 -->
+            <div v-if="exam.scoring_mode === 'unlimited'" class="text-2xl font-bold" :class="currentScore < 50 ? 'text-red-600' : 'text-gray-900'">
+              {{ currentScore }} 分
+            </div>
+            <!-- 普通模式显示时间 -->
+            <div v-else class="text-2xl font-bold" :class="timeRemaining < 300 ? 'text-red-600' : 'text-gray-900'">
               {{ formatTime(timeRemaining) }}
             </div>
-            <p class="text-sm text-gray-500">剩余时间</p>
+            <p class="text-sm text-gray-500">{{ exam.scoring_mode === 'unlimited' ? '剩余分数' : '剩余时间' }}</p>
           </div>
         </div>
         
@@ -98,6 +106,24 @@
               class="bg-blue-600 h-2 rounded-full transition-all duration-300"
               :style="{ width: `${((currentQuestionIndex + 1) / exam.questions.length) * 100}%` }"
             ></div>
+          </div>
+        </div>
+        
+        <!-- 无限制答题模式统计信息 -->
+        <div v-if="exam.scoring_mode === 'unlimited'" class="mt-4 grid grid-cols-3 gap-4 text-center">
+          <div class="bg-gray-50 p-2 rounded">
+            <div class="text-lg font-semibold text-gray-900">{{ questionsAnswered }}</div>
+            <div class="text-xs text-gray-500">已答题数</div>
+          </div>
+          <div class="bg-gray-50 p-2 rounded">
+            <div class="text-lg font-semibold text-green-600">{{ correctAnswers }}</div>
+            <div class="text-xs text-gray-500">答对题数</div>
+          </div>
+          <div class="bg-gray-50 p-2 rounded">
+            <div class="text-lg font-semibold text-blue-600">
+              {{ questionsAnswered > 0 ? Math.round((correctAnswers / questionsAnswered) * 100) : 0 }}%
+            </div>
+            <div class="text-xs text-gray-500">正确率</div>
           </div>
         </div>
       </div>
@@ -168,21 +194,34 @@
           </button>
           
           <div class="flex space-x-2">
-            <button
-              v-if="currentQuestionIndex < exam.questions.length - 1"
-              @click="nextQuestion"
-              class="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700"
-            >
-              下一题
-            </button>
-            <button
-              v-else
-              @click="submitExam"
-              :disabled="isSubmitting"
-              class="px-4 py-2 bg-green-600 text-white rounded-md text-sm font-medium hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {{ isSubmitting ? '提交中...' : '提交试卷' }}
-            </button>
+            <!-- 无限制答题模式 -->
+            <template v-if="exam.scoring_mode === 'unlimited'">
+              <button
+                @click="submitUnlimitedAnswer"
+                :disabled="isSubmitting || !hasCurrentAnswer"
+                class="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {{ isSubmitting ? '提交中...' : '提交答案' }}
+              </button>
+            </template>
+            <!-- 普通模式 -->
+            <template v-else>
+              <button
+                v-if="currentQuestionIndex < exam.questions.length - 1"
+                @click="nextQuestion"
+                class="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700"
+              >
+                下一题
+              </button>
+              <button
+                v-else
+                @click="submitExam"
+                :disabled="isSubmitting"
+                class="px-4 py-2 bg-green-600 text-white rounded-md text-sm font-medium hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {{ isSubmitting ? '提交中...' : '提交试卷' }}
+              </button>
+            </template>
           </div>
         </div>
       </div>
@@ -197,9 +236,34 @@
           </svg>
         </div>
         
-        <h1 class="text-2xl font-bold text-gray-900 mb-4">考试完成！</h1>
+        <h1 class="text-2xl font-bold text-gray-900 mb-4">
+          {{ examResult.scoring_mode === 'unlimited' ? '无限制答题完成！' : '考试完成！' }}
+        </h1>
         
-        <div class="grid grid-cols-2 gap-4 mb-6">
+        <!-- 无限制答题模式结果 -->
+        <div v-if="examResult.scoring_mode === 'unlimited'" class="grid grid-cols-2 gap-4 mb-6">
+          <div class="bg-gray-50 p-4 rounded-lg">
+            <div class="text-sm text-gray-500">答题数量</div>
+            <div class="text-2xl font-bold text-gray-900">{{ examResult.total_questions }} 题</div>
+          </div>
+          <div class="bg-gray-50 p-4 rounded-lg">
+            <div class="text-sm text-gray-500">最终得分</div>
+            <div class="text-2xl font-bold text-gray-900">{{ examResult.total_score }} 分</div>
+          </div>
+          <div class="bg-gray-50 p-4 rounded-lg">
+            <div class="text-sm text-gray-500">答对题数</div>
+            <div class="text-2xl font-bold text-green-600">{{ examResult.correct_count }} 题</div>
+          </div>
+          <div class="bg-gray-50 p-4 rounded-lg">
+            <div class="text-sm text-gray-500">正确率</div>
+            <div class="text-2xl font-bold text-blue-600">
+              {{ Math.round((examResult.correct_count / examResult.total_questions) * 100) }}%
+            </div>
+          </div>
+        </div>
+        
+        <!-- 普通模式结果 -->
+        <div v-else class="grid grid-cols-2 gap-4 mb-6">
           <div class="bg-gray-50 p-4 rounded-lg">
             <div class="text-sm text-gray-500">得分</div>
             <div class="text-2xl font-bold text-gray-900">{{ examResult.total_score }} 分</div>
@@ -254,9 +318,24 @@ const timeRemaining = ref(0)
 const timer = ref(null)
 const examResult = ref(null)
 
+// 无限制答题模式相关
+const currentScore = ref(0)
+const questionsAnswered = ref(0)
+const correctAnswers = ref(0)
+
 const currentQuestion = computed(() => {
   if (!exam.value || !exam.value.questions) return null
   return exam.value.questions[currentQuestionIndex.value]
+})
+
+const hasCurrentAnswer = computed(() => {
+  if (!currentQuestion.value) return false
+  const answer = answers[currentQuestion.value.id]
+  if (currentQuestion.value.type === 'single') {
+    return answer !== null && answer !== undefined
+  } else {
+    return Array.isArray(answer) && answer.length > 0
+  }
 })
 
 const isOptionSelected = (optionIndex) => {
@@ -349,7 +428,15 @@ const startExam = async () => {
       examStarted.value = true
       startTime.value = Date.now()
       timeRemaining.value = (exam.value.duration || 60) * 60
-      startTimer()
+      
+      // 无限制答题模式初始化
+      if (exam.value.scoring_mode === 'unlimited') {
+        currentScore.value = exam.value.total_score
+        questionsAnswered.value = 0
+        correctAnswers.value = 0
+      } else {
+        startTimer()
+      }
     } else {
       alert(result.error || '开始考试失败')
     }
@@ -370,6 +457,75 @@ const previousQuestion = () => {
 const nextQuestion = () => {
   if (currentQuestionIndex.value < exam.value.questions.length - 1) {
     currentQuestionIndex.value++
+  }
+}
+
+const submitUnlimitedAnswer = async () => {
+  if (!hasCurrentAnswer.value) return
+  
+  isSubmitting.value = true
+  
+  try {
+    const question = currentQuestion.value
+    const userAnswer = answers[question.id]
+    
+    // 检查答案是否正确
+    let isCorrect = false
+    if (question.type === 'single') {
+      isCorrect = userAnswer === question.correct_answer
+    } else if (question.type === 'multiple') {
+      isCorrect = Array.isArray(userAnswer) && 
+        userAnswer.length === question.correct_answer.length &&
+        userAnswer.every(ans => question.correct_answer.includes(ans))
+    }
+    
+    questionsAnswered.value++
+    
+    if (isCorrect) {
+      correctAnswers.value++
+      // 答对不计分，继续下一题
+      if (currentQuestionIndex.value < exam.value.questions.length - 1) {
+        currentQuestionIndex.value++
+      } else {
+        // 所有题目答完，提交试卷
+        await submitExam()
+        return
+      }
+    } else {
+      // 答错扣分
+      currentScore.value -= question.score
+      if (currentScore.value <= 0) {
+        // 分数扣完，结束考试
+        currentScore.value = 0
+        await submitExam()
+        return
+      } else {
+        // 继续下一题
+        if (currentQuestionIndex.value < exam.value.questions.length - 1) {
+          currentQuestionIndex.value++
+        } else {
+          // 所有题目答完，提交试卷
+          await submitExam()
+          return
+        }
+      }
+    }
+    
+    // 为下一题初始化答案
+    const nextQuestion = exam.value.questions[currentQuestionIndex.value]
+    if (nextQuestion) {
+      if (nextQuestion.type === 'single') {
+        answers[nextQuestion.id] = null
+      } else {
+        answers[nextQuestion.id] = []
+      }
+    }
+    
+  } catch (error) {
+    console.error('提交答案失败:', error)
+    alert('提交答案失败，请重试')
+  } finally {
+    isSubmitting.value = false
   }
 }
 

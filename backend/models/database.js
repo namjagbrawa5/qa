@@ -57,7 +57,7 @@ const initDatabase = () => {
         title TEXT NOT NULL,
         description TEXT,
         duration INTEGER DEFAULT 60, -- 考试时长（分钟）
-        scoring_mode TEXT DEFAULT 'add' CHECK(scoring_mode IN ('add', 'subtract')),
+        scoring_mode TEXT DEFAULT 'add' CHECK(scoring_mode IN ('add', 'subtract', 'unlimited')),
         total_score INTEGER DEFAULT 0,
         is_active BOOLEAN DEFAULT 1,
         created_by INTEGER,
