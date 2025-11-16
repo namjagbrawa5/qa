@@ -58,8 +58,10 @@
         </div>
       </div>
 
-      <!-- 移动端卡片视图 -->
-      <div v-else class="md:hidden space-y-4">
+      <!-- 试卷列表视图 -->
+      <div v-else>
+        <!-- 移动端卡片视图 -->
+        <div class="md:hidden space-y-4">
         <div
           v-for="exam in examStore.exams"
           :key="exam.id"
@@ -157,9 +159,9 @@
         </div>
       </div>
 
-      <!-- 桌面端网格视图 -->
-      <div v-else class="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div
+        <!-- 桌面端网格视图 -->
+        <div class="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div
           v-for="exam in examStore.exams"
           :key="exam.id"
           class="bg-white rounded-lg shadow border border-gray-200 p-6 hover:shadow-lg transition-shadow"
@@ -250,6 +252,7 @@
               </button>
             </template>
           </div>
+        </div>
         </div>
       </div>
     </div>
