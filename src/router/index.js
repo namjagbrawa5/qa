@@ -9,6 +9,7 @@ import UnlimitedMode from '../views/UnlimitedMode.vue'
 import Login from '../views/Login.vue'
 import Register from '../views/Register.vue'
 import UserManagement from '../views/UserManagement.vue'
+import UserExamStatus from '../views/UserExamStatus.vue'
 
 const routes = [
   {
@@ -63,6 +64,12 @@ const routes = [
     path: '/users',
     name: 'UserManagement',
     component: UserManagement,
+    meta: { requiresAuth: true, requiresAdmin: true }
+  },
+  {
+    path: '/user-exam-status',
+    name: 'UserExamStatus',
+    component: UserExamStatus,
     meta: { requiresAuth: true, requiresAdmin: true }
   }
 ]

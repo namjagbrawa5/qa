@@ -35,6 +35,74 @@ router.get('/stats', authenticateToken, requireAdmin, async (req, res) => {
   }
 });
 
+// 获取用户考试状态（仅管理员） - 必须在 /:userId 路由之前
+router.get('/exam-status', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { examId, search, status, limit = 100, offset = 0 } = req.query;
+    
+    let query = `
+      SELECT 
+        u.id as user_id,
+        u.username,
+        u.email,
+        e.id as exam_id,
+        e.title as exam_title,
+        e.scoring_mode,
+        e.total_score,
+        er.id as record_id,
+        er.started_at,
+        er.submitted_at,
+        er.total_score as user_score,
+        er.correct_count,
+        er.total_questions,
+        er.duration_seconds,
+        CASE 
+          WHEN er.submitted_at IS NOT NULL THEN 'completed'
+          WHEN er.started_at IS NOT NULL THEN 'in_progress'
+          ELSE 'not_started'
+        END as status
+      FROM users u
+      CROSS JOIN exams e
+      LEFT JOIN exam_records er ON u.id = er.user_id AND e.id = er.exam_id
+      WHERE u.role != 'admin'
+    `;
+    
+    const params = [];
+    
+    // 筛选条件
+    if (examId) {
+      query += ' AND e.id = ?';
+      params.push(examId);
+    }
+    
+    if (search) {
+      query += ' AND (u.username LIKE ? OR u.email LIKE ?)';
+      params.push(`%${search}%`, `%${search}%`);
+    }
+    
+    if (status) {
+      if (status === 'completed') {
+        query += ' AND er.submitted_at IS NOT NULL';
+      } else if (status === 'in_progress') {
+        query += ' AND er.started_at IS NOT NULL AND er.submitted_at IS NULL';
+      } else if (status === 'not_started') {
+        query += ' AND er.started_at IS NULL';
+      }
+    }
+    
+    query += ' ORDER BY u.username, e.title LIMIT ? OFFSET ?';
+    params.push(parseInt(limit), parseInt(offset));
+    
+    const { dbAll } = await import('../config/database.js');
+    const results = await dbAll(query, params);
+    
+    res.json(results);
+  } catch (error) {
+    console.error('Get user exam status error:', error);
+    res.status(500).json({ error: '获取用户考试状态失败' });
+  }
+});
+
 // 获取特定用户信息
 router.get('/:userId', authenticateToken, requireOwnershipOrAdmin, async (req, res) => {
   try {

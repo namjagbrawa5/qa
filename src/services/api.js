@@ -84,7 +84,10 @@ export const userAPI = {
   deleteUser: (userId) => api.delete(`/users/${userId}`),
   
   // 重置用户密码
-  resetUserPassword: (userId, passwordData) => api.put(`/users/${userId}/reset-password`, passwordData)
+  resetUserPassword: (userId, passwordData) => api.put(`/users/${userId}/reset-password`, passwordData),
+  
+  // 获取用户考试状态（管理员）
+  getUserExamStatus: (params = {}) => api.get('/users/exam-status', { params })
 };
 
 // 题目管理API
@@ -183,7 +186,10 @@ export const examAPI = {
   startExam: (examId) => api.post(`/exams/${examId}/start`),
   
   // 提交考试
-  submitExam: (examId, submissionData) => api.post(`/exams/${examId}/submit`, submissionData)
+  submitExam: (examId, submissionData) => api.post(`/exams/${examId}/submit`, submissionData),
+  
+  // 重置用户考试（管理员）
+  resetUserExam: (examId, userId) => api.delete(`/exams/${examId}/users/${userId}/reset`)
 };
 
 // 统计API

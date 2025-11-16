@@ -309,4 +309,33 @@ router.post('/:examId/submit', authenticateToken, async (req, res) => {
   }
 });
 
+// 重置用户考试（仅管理员）
+router.delete('/:examId/users/:userId/reset', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { examId, userId } = req.params;
+    
+    // 检查试卷是否存在
+    const exam = await Exam.findById(examId);
+    if (!exam) {
+      return res.status(404).json({ error: '试卷不存在' });
+    }
+    
+    // 删除用户的考试记录
+    const { dbRun } = await import('../config/database.js');
+    const result = await dbRun(
+      'DELETE FROM exam_records WHERE exam_id = ? AND user_id = ?',
+      [examId, userId]
+    );
+    
+    if (result.changes === 0) {
+      return res.status(404).json({ error: '未找到该用户的考试记录' });
+    }
+    
+    res.json({ message: '考试记录已重置' });
+  } catch (error) {
+    console.error('Reset user exam error:', error);
+    res.status(500).json({ error: '重置考试失败' });
+  }
+});
+
 export default router;

@@ -29,6 +29,12 @@
             >
               用户管理
             </router-link>
+            <router-link 
+              to="/user-exam-status"
+              class="border border-purple-600 text-purple-600 px-6 py-3 rounded-lg font-medium hover:bg-purple-50 transition-colors"
+            >
+              考试状态
+            </router-link>
           </template>
           <template v-else>
             <router-link 
