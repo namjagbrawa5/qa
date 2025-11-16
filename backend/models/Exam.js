@@ -15,11 +15,11 @@ class Exam {
     
     // 计算总分
     let totalScore;
-    if (scoringMode === 'unlimited' && customTotalScore) {
-      // 无限制答题模式使用自定义总分
+    if (customTotalScore) {
+      // 使用自定义总分
       totalScore = customTotalScore;
     } else {
-      // 其他模式使用题目分数之和
+      // 使用题目分数之和作为默认值
       const questionDetails = await Question.findByIds(questions);
       totalScore = questionDetails.reduce((sum, q) => sum + q.score, 0);
     }
@@ -136,11 +136,11 @@ class Exam {
       
       // 重新计算总分
       let totalScore;
-      if (updates.scoringMode === 'unlimited' && updates.customTotalScore) {
-        // 无限制答题模式使用自定义总分
+      if (updates.customTotalScore) {
+        // 使用自定义总分
         totalScore = updates.customTotalScore;
       } else {
-        // 其他模式使用题目分数之和
+        // 使用题目分数之和作为默认值
         const questionDetails = await Question.findByIds(updates.questions);
         totalScore = questionDetails.reduce((sum, q) => sum + q.score, 0);
       }
